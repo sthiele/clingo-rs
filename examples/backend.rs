@@ -1,5 +1,5 @@
 use clingo::*;
-use std::env;
+use std::{env, vec};
 
 fn print_model(model: &Model) {
     // retrieve the symbols in the model
@@ -9,14 +9,13 @@ fn print_model(model: &Model) {
 
     print!("Model:");
 
-    for atom in atoms {
-        // retrieve and print the symbol's string
-        print!(" {}", atom.to_string().unwrap());
+    for symbol in atoms {
+        print!(" {}", symbol);
     }
     println!();
 }
 
-fn solve(ctl: &mut Control) {
+fn solve(ctl: Control) {
     // get a solve handle
     let mut handle = ctl
         .solve(SolveMode::YIELD, &[])
@@ -46,14 +45,14 @@ fn main() {
     let options = env::args().skip(1).collect();
 
     // create a control object and pass command line arguments
-    let mut ctl = Control::new(options).expect("Failed creating clingo_control.");
+    let mut ctl = control(options).expect("Failed creating clingo_control.");
 
     // add a logic program to the base part
     ctl.add("base", &[], "{a; b; c}.")
         .expect("Failed to add a logic program");
 
     // ground the base part
-    let part = Part::new("base", &[]).unwrap();
+    let part = Part::new("base", vec![]).unwrap();
     let parts = vec![part];
     ctl.ground(&parts)
         .expect("Failed to ground a logic program.");
@@ -102,5 +101,5 @@ fn main() {
     }
 
     // solve
-    solve(&mut ctl);
+    solve(ctl);
 }
